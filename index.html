@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Generador de Presupuestos & Realtime Database (Multiusuario)</title>
+    <title>Generador de Presupuestos & Realtime Database (Selección Directa)</title>
     <style>
         :root {
             --primary-color: #2b6cb0;
@@ -101,7 +101,7 @@
             margin-bottom: 10px;
         }
 
-        /* Botones de Control de Usuario (Esquina superior derecha) */
+        /* Botones de Control de Usuario */
         .user-controls {
             position: absolute;
             top: 10px;
@@ -256,6 +256,7 @@
             border-radius: 5px;
             font-size: 14px;
             outline: none;
+            background-color: #fff;
             transition: border-color 0.2s;
         }
 
@@ -285,31 +286,6 @@
             background-color: #e53e3e;
         }
 
-        /* Autocompletar / Buscador en tiempo real */
-        .suggestions-box {
-            position: absolute;
-            top: 100%;
-            left: 0;
-            right: 0;
-            background: white;
-            border: 1px solid var(--border-color);
-            border-radius: 0 0 5px 5px;
-            max-height: 150px;
-            overflow-y: auto;
-            z-index: 10;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        }
-
-        .suggestion-item {
-            padding: 10px;
-            cursor: pointer;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        .suggestion-item:hover {
-            background-color: var(--accent-color);
-        }
-
         /* Tablas */
         table {
             width: 100%;
@@ -328,7 +304,7 @@
             background-color: #f7fafc;
         }
 
-        /* Artículos del Presupuesto */
+        /* Artículos del Presupuesto - Simplificado sin Inputs de Texto */
         .items-section {
             margin-top: 30px;
             border-top: 2px solid var(--border-color);
@@ -337,7 +313,7 @@
 
         .item-row {
             display: grid;
-            grid-template-columns: 2fr 3fr 1fr 1fr;
+            grid-template-columns: 3fr 1fr auto;
             gap: 15px;
             align-items: end;
             margin-bottom: 15px;
@@ -365,7 +341,7 @@
             color: var(--primary-color);
         }
 
-        /* Previsualización del Logo en Configuración */
+        /* Previsualización del Logo */
         .logo-preview-container {
             margin-top: 10px;
             width: 150px;
@@ -441,6 +417,7 @@
 </head>
 <body>
 
+<!-- 1. PANTALLA DE INICIO DE SESIÓN -->
 <div id="login-screen" class="container">
     <div class="login-card">
         <h2>Bienvenido</h2>
@@ -457,12 +434,14 @@
     </div>
 </div>
 
+<!-- 2. PANTALLA PRINCIPAL DE LA APLICACIÓN -->
 <div id="app-screen" class="container no-print">
+    <!-- Controles Superiores Derecha -->
     <div class="user-controls">
         <button id="btn-logout" class="btn btn-danger" style="padding: 8px 15px;">Salir</button>
         <div class="config-trigger" onclick="toggleModal('config-modal', true)" title="Configuración de la Empresa">
             <svg viewBox="0 0 24 24">
-                <path d="M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.07-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61 l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41 h-3.84c-0.24,0-0.43,0.17-0.47,0.41L9.25,5.35C8.66,5.59,8.12,5.92,7.63,6.29L5.24,5.33c-0.22-0.08-0.47,0-0.59,0.22L2.74,8.87 C2.62,9.08,2.66,9.34,2.86,9.48l2.03,1.58C4.84,11.36,4.8,11.69,4.8,12c0,0.31,0.02,0.64,0.07,0.94l-2.03,1.58 c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.36,2.54 c0.05,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.44-0.17,0.47-0.41l0.36-2.54c0.59-0.24,1.13-0.56,1.62-0.94l2.39,0.96 c0.22,0.08,0.47,0,0.59-0.22l1.92-3.32c0.12-0.22,0.07-0.47-0.12-0.61L19.14,12.94z M12,15.6c-1.98,0-3.6-1.62-3.6-3.6 s1.62-3.6,3.6-3.6s3.6,1.62,3.6,3.6S13.98,15.6,12,15.6z"/>
+                <path d="M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.07-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61 l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41 h-3.84c-0.24,0-0.43,0.17-0.47,0.41L9.25,5.35C8.66,5.59,8.12,5.92,7.63,6.29L5.24,5.33c-0.22-0.08-0.47,0-0.59,0.22L2.74,8.87 C2.62,9.08,2.66,9.34,2.86,9.48l2.03,1.58C4.84,11.36,4.8,11.69,4.8,12c0,0.31,0.02,0.64,0.07,0.94l-2.03,1.58 c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.36,2.54 c0.05,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.44-0.17,0.47-0.41l0.36-2.54c0.59-0.24,1.13-0.56,1.62-0.94l2.39,0.96c0.22,0.08,0.47,0,0.59-0.22l1.92-3.32c0.12-0.22,0.07-0.47-0.12-0.61L19.14,12.94z M12,15.6c-1.98,0-3.6-1.62-3.6-3.6 s1.62-3.6,3.6-3.6s3.6,1.62,3.6,3.6S13.98,15.6,12,15.6z"/>
             </svg>
         </div>
     </div>
@@ -472,38 +451,41 @@
         <p>Tus datos están protegidos y sincronizados en la nube.</p>
     </header>
 
+    <!-- Pestañas de Navegación -->
     <div class="tabs">
         <button class="tab-btn active" onclick="openTab(event, 'presupuesto-tab')">Crear Presupuesto</button>
         <button class="tab-btn" onclick="openTab(event, 'inventario-tab')">Inventario</button>
         <button class="tab-btn" onclick="openTab(event, 'clientes-tab')">Clientes</button>
     </div>
 
+    <!-- PESTAÑA: PRESUPUESTO -->
     <div id="presupuesto-tab" class="tab-content active">
         <h2>Nuevo Presupuesto</h2>
         <hr style="margin: 15px 0; border: 0; border-top: 1px solid var(--border-color);">
         
+        <!-- SELECCIÓN DIRECTA DE CLIENTES -->
         <div class="form-group">
-            <label for="buscar-cliente-input">Buscar / Seleccionar Cliente</label>
-            <input type="text" id="buscar-cliente-input" placeholder="Escribe el nombre o NIT del cliente para buscar..." oninput="filtrarClientesPresupuesto(this.value)">
+            <label for="presupuesto-cliente-select">Seleccionar Cliente Registrado</label>
+            <select id="presupuesto-cliente-select" onchange="seleccionarClientePresupuesto(this.value)">
+                <option value="">-- Selecciona un cliente --</option>
+            </select>
             <input type="hidden" id="presupuesto-cliente-id">
-            <div id="suggestions-clientes" class="suggestions-box" style="display: none;"></div>
             <div id="cliente-seleccionado-info" style="margin-top: 10px; font-weight: bold; color: var(--primary-color);"></div>
         </div>
 
+        <!-- SELECCIÓN DIRECTA DE ARTÍCULOS -->
         <div class="items-section">
             <h3>Artículos de la Cotización</h3>
-            <p style="font-size: 13px; color: #718096; margin-bottom: 10px;">Busca artículos registrados por código EAN o descripción para cargarlos rápidamente.</p>
+            <p style="font-size: 13px; color: #718096; margin-bottom: 15px;">Selecciona el artículo de la lista. El precio se cargará de manera automática.</p>
             
             <div id="items-container">
+                <!-- Fila de artículo base -->
                 <div class="item-row" id="row-0">
                     <div class="form-group" style="margin-bottom: 0;">
-                        <label>Código EAN</label>
-                        <input type="text" class="item-ean" placeholder="EAN13" oninput="buscarPorEan(this, 0)">
-                    </div>
-                    <div class="form-group" style="margin-bottom: 0;">
-                        <label>Descripción del Artículo</label>
-                        <input type="text" class="item-desc" placeholder="Escribe descripción o busca..." oninput="buscarPorDesc(this, 0)">
-                        <div class="suggestions-box" style="display: none;"></div>
+                        <label>Seleccionar Artículo del Inventario</label>
+                        <select class="item-select" onchange="seleccionarProductoFila(this, 0)">
+                            <option value="">-- Selecciona un artículo --</option>
+                        </select>
                     </div>
                     <div class="form-group" style="margin-bottom: 0;">
                         <label>Precio Unitario ($)</label>
@@ -528,6 +510,7 @@
         </div>
     </div>
 
+    <!-- PESTAÑA: INVENTARIO -->
     <div id="inventario-tab" class="tab-content">
         <h2>Inventario de Artículos</h2>
         <form id="inventario-form" onsubmit="guardarArticulo(event)" style="margin-bottom: 30px;">
@@ -559,10 +542,12 @@
                 </tr>
             </thead>
             <tbody>
-                </tbody>
+                <!-- Se llena dinámicamente -->
+            </tbody>
         </table>
     </div>
 
+    <!-- PESTAÑA: CLIENTES -->
     <div id="clientes-tab" class="tab-content">
         <h2>Registro de Clientes</h2>
         <form id="cliente-form" onsubmit="guardarCliente(event)" style="margin-bottom: 30px;">
@@ -615,11 +600,13 @@
                 </tr>
             </thead>
             <tbody>
-                </tbody>
+                <!-- Se llena dinámicamente -->
+            </tbody>
         </table>
     </div>
 </div>
 
+<!-- MODAL DE CONFIGURACIÓN -->
 <div id="config-modal" class="modal">
     <div class="modal-content">
         <button class="close-modal" onclick="toggleModal('config-modal', false)">&times;</button>
@@ -684,6 +671,7 @@
     </div>
 </div>
 
+<!-- VISTA PREVIA DEL DOCUMENTO PARA IMPRIMIR -->
 <div id="print-preview">
     <div class="preview-header">
         <div>
@@ -718,7 +706,8 @@
             </tr>
         </thead>
         <tbody>
-            </tbody>
+            <!-- Se llena dinámicamente -->
+        </tbody>
     </table>
 
     <div style="display: flex; justify-content: space-between; margin-top: 30px;">
@@ -739,6 +728,7 @@
     </div>
 </div>
 
+<!-- LIBRERÍAS DE FIREBASE -->
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { 
@@ -748,7 +738,7 @@
         getDatabase, ref, set, push, remove, onValue 
     } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-    // Configuración exacta con tus credenciales
+    // Configuración de Firebase
     const firebaseConfig = {
         apiKey: "AIzaSyAz3Zq6vLgWOUD-l5zX4RbK-heheWhTbSI",
         authDomain: "presupuesto-1bc15.firebaseapp.com",
@@ -758,13 +748,11 @@
         appId: "1:181466481599:web:bb10078674cd377b97970a"
     };
 
-    // Inicializar Firebase
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getDatabase(app);
     const provider = new GoogleAuthProvider();
 
-    // Variables de control de datos del usuario actual
     let currentUser = null;
     let clientes = [];
     let inventario = [];
@@ -774,21 +762,15 @@
 
     let countFilas = 1;
 
-    /* 1. SISTEMA DE AUTENTICACIÓN (LOGIN/LOGOUT) */
-    
-    // Escuchar el cambio de estado de sesión
+    /* 1. AUTENTICACIÓN */
     onAuthStateChanged(auth, (user) => {
         if (user) {
-            // Usuario logueado
             currentUser = user;
             document.getElementById('login-screen').style.display = 'none';
             document.getElementById('app-screen').style.display = 'block';
             document.getElementById('user-welcome').textContent = `¡Hola, ${user.displayName}!`;
-            
-            // Iniciar sincronización de base de datos para este UID específico
             activarSincronizacionDatos();
         } else {
-            // Usuario no logueado
             currentUser = null;
             document.getElementById('login-screen').style.display = 'flex';
             document.getElementById('app-screen').style.display = 'none';
@@ -796,31 +778,24 @@
         }
     });
 
-    // Iniciar Sesión con Google
     document.getElementById('btn-login-google').addEventListener('click', () => {
-        signInWithPopup(auth, provider)
-            .catch((error) => {
-                console.error("Error al autenticar con Google: ", error);
-                alert("No se pudo iniciar sesión. Verifica la consola.");
-            });
-    });
-
-    // Cerrar Sesión
-    document.getElementById('btn-logout').addEventListener('click', () => {
-        signOut(auth).catch((error) => {
-            console.error("Error al cerrar sesión: ", error);
+        signInWithPopup(auth, provider).catch((error) => {
+            console.error(error);
+            alert("No se pudo iniciar sesión.");
         });
     });
 
-    /* 2. SINCRONIZACIÓN DE DATOS DINÁMICA SEGÚN EL UID DEL USUARIO */
+    document.getElementById('btn-logout').addEventListener('click', () => {
+        signOut(auth);
+    });
 
-    let unsubs = []; // Para almacenar los escuchadores y poder limpiarlos si cambia de cuenta
-
+    /* 2. REALTIME SYNC */
+    let unsubs = [];
     function activarSincronizacionDatos() {
         if (!currentUser) return;
         const uid = currentUser.uid;
 
-        // Sincronizar Clientes
+        // Clientes
         const clientesRef = ref(db, `clientes/${uid}`);
         const unsubClientes = onValue(clientesRef, (snapshot) => {
             clientes = [];
@@ -831,10 +806,11 @@
                 });
             }
             renderizarTablaClientes();
+            actualizarDropdownClientes(); // Actualiza selector de presupuestos
         });
         unsubs.push(unsubClientes);
 
-        // Sincronizar Inventario
+        // Inventario
         const inventarioRef = ref(db, `inventario/${uid}`);
         const unsubInventario = onValue(inventarioRef, (snapshot) => {
             inventario = [];
@@ -845,300 +821,83 @@
                 });
             }
             renderizarTablaInventario();
+            actualizarDropdownsProductos(); // Actualiza selectores de presupuestos
         });
         unsubs.push(unsubInventario);
 
-        // Sincronizar Configuración de Empresa
+        // Configuración
         const configRef = ref(db, `configuracion/${uid}`);
         const unsubConfig = onValue(configRef, (snapshot) => {
             const data = snapshot.val();
-            if (data) {
-                datosEmpresa = data;
-            } else {
-                // Configuración limpia inicial para el usuario nuevo
-                datosEmpresa = {
-                    nit: '', nombre: '', direccion: '', cp: '', ciudad: '', telefono: '', email: '', garantias: '', logo: ''
-                };
-            }
+            datosEmpresa = data || { nit: '', nombre: '', direccion: '', cp: '', ciudad: '', telefono: '', email: '', garantias: '', logo: '' };
             cargarDatosEmpresaForm();
         });
         unsubs.push(unsubConfig);
     }
 
     function desactivarSincronizacionDatos() {
-        // Limpiamos los arrays locales
         clientes = [];
         inventario = [];
         datosEmpresa = {};
         unsubs = [];
     }
 
-
-    /* 3. CONFIGURACIÓN DE LA EMPRESA (CON LOGO BASE64) */
-    function cargarDatosEmpresaForm() {
-        document.getElementById('emp-nit').value = datosEmpresa.nit || '';
-        document.getElementById('emp-nombre').value = datosEmpresa.nombre || '';
-        document.getElementById('emp-direccion').value = datosEmpresa.direccion || '';
-        document.getElementById('emp-cp').value = datosEmpresa.cp || '';
-        document.getElementById('emp-ciudad').value = datosEmpresa.ciudad || '';
-        document.getElementById('emp-telefono').value = datosEmpresa.telefono || '';
-        document.getElementById('emp-email').value = datosEmpresa.email || '';
-        document.getElementById('emp-garantias').value = datosEmpresa.garantias || '';
+    /* 3. ACTUALIZADORES DE SELECTORES EN PRESUPUESTO */
+    function actualizarDropdownClientes() {
+        const select = document.getElementById('presupuesto-cliente-select');
+        const valorSeleccionado = select.value;
+        select.innerHTML = '<option value="">-- Selecciona un cliente --</option>';
         
-        const preview = document.getElementById('logo-preview');
-        if (datosEmpresa.logo) {
-            preview.src = datosEmpresa.logo;
-            preview.style.display = 'block';
-            document.getElementById('no-logo-text').style.display = 'none';
-        } else {
-            preview.style.display = 'none';
-            document.getElementById('no-logo-text').style.display = 'block';
-        }
-    }
-
-    // Convertir el logo cargado a una String Base64 para guardarlo directo en Realtime Database
-    window.convertirLogo = function(input) {
-        const file = input.files[0];
-        if (file) {
-            // Límite recomendado ~800KB para evitar latencia de carga en texto Base64
-            if (file.size > 800 * 1024) { 
-                alert("La imagen es muy pesada. Sube una menor a 800KB.");
-                input.value = "";
-                return;
-            }
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                datosEmpresa.logo = e.target.result; // String Base64
-                const preview = document.getElementById('logo-preview');
-                preview.src = e.target.result;
-                preview.style.display = 'block';
-                document.getElementById('no-logo-text').style.display = 'none';
-            };
-            reader.readAsDataURL(file);
-        }
-    }
-
-    window.guardarEmpresa = async function(e) {
-        e.preventDefault();
-        if(!currentUser) return;
-        
-        const nuevaConfig = {
-            nombre: document.getElementById('emp-nombre').value,
-            nit: document.getElementById('emp-nit').value,
-            direccion: document.getElementById('emp-direccion').value,
-            cp: document.getElementById('emp-cp').value,
-            ciudad: document.getElementById('emp-ciudad').value,
-            telefono: document.getElementById('emp-telefono').value,
-            email: document.getElementById('emp-email').value,
-            garantias: document.getElementById('emp-garantias').value,
-            logo: datosEmpresa.logo || "" 
-        };
-
-        try {
-            await set(ref(db, `configuracion/${currentUser.uid}`), nuevaConfig);
-            alert('Configuración guardada.');
-            toggleModal('config-modal', false);
-        } catch (error) {
-            console.error("Error al guardar la empresa: ", error);
-            alert("No se pudo guardar la configuración.");
-        }
-    }
-
-
-    /* 4. INVENTARIO */
-    window.guardarArticulo = async function(e) {
-        e.preventDefault();
-        if(!currentUser) return;
-
-        const nuevoArt = {
-            ean: document.getElementById('inv-ean').value.trim(),
-            desc: document.getElementById('inv-desc').value.trim(),
-            precio: parseFloat(document.getElementById('inv-precio').value) || 0
-        };
-
-        if(inventario.some(art => art.ean === nuevoArt.ean)) {
-            alert('Este código EAN ya se encuentra registrado.');
-            return;
-        }
-
-        try {
-            const nuevoArtRef = push(ref(db, `inventario/${currentUser.uid}`));
-            await set(nuevoArtRef, nuevoArt);
-            document.getElementById('inventario-form').reset();
-            alert('Artículo guardado.');
-        } catch (error) {
-            console.error("Error al registrar artículo: ", error);
-        }
-    }
-
-    window.eliminarArticulo = async function(id) {
-        if(!currentUser) return;
-        if(confirm('¿Seguro que deseas eliminar este artículo?')) {
-            try {
-                await remove(ref(db, `inventario/${currentUser.uid}/${id}`));
-            } catch (error) {
-                console.error("Error al eliminar artículo: ", error);
-            }
-        }
-    }
-
-    function renderizarTablaInventario() {
-        const tbody = document.querySelector('#tabla-inventario tbody');
-        tbody.innerHTML = '';
-        const formatoMoneda = new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 });
-        inventario.forEach(art => {
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td><strong>${art.ean}</strong></td>
-                <td>${art.desc}</td>
-                <td>${formatoMoneda.format(art.precio)}</td>
-                <td>
-                    <button class="btn btn-danger" style="padding: 5px 10px; font-size: 12px;" onclick="eliminarArticulo('${art.id}')">Eliminar</button>
-                </td>
-            `;
-            tbody.appendChild(tr);
-        });
-    }
-
-
-    /* 5. CLIENTES */
-    window.guardarCliente = async function(e) {
-        e.preventDefault();
-        if(!currentUser) return;
-
-        const nuevoCliente = {
-            nit: document.getElementById('cli-nit').value.trim(),
-            nombre: document.getElementById('cli-nombre').value.trim(),
-            direccion: document.getElementById('cli-direccion').value.trim(),
-            cp: document.getElementById('cli-cp').value.trim(),
-            ciudad: document.getElementById('cli-ciudad').value.trim(),
-            telefono: document.getElementById('cli-telefono').value.trim(),
-            email: document.getElementById('cli-email').value.trim(),
-        };
-
-        try {
-            const nuevoClienteRef = push(ref(db, `clientes/${currentUser.uid}`));
-            await set(nuevoClienteRef, nuevoCliente);
-            document.getElementById('cliente-form').reset();
-            alert('Cliente registrado.');
-        } catch (error) {
-            console.error("Error registrando cliente: ", error);
-        }
-    }
-
-    window.eliminarCliente = async function(id) {
-        if(!currentUser) return;
-        if(confirm('¿Seguro que deseas eliminar este cliente?')) {
-            try {
-                await remove(ref(db, `clientes/${currentUser.uid}/${id}`));
-            } catch (error) {
-                console.error("Error eliminando cliente: ", error);
-            }
-        }
-    }
-
-    function renderizarTablaClientes() {
-        const tbody = document.querySelector('#tabla-clientes tbody');
-        tbody.innerHTML = '';
         clientes.forEach(c => {
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td>${c.nit}</td>
-                <td>${c.nombre}</td>
-                <td>${c.telefono}</td>
-                <td>${c.ciudad}</td>
-                <td>
-                    <button class="btn btn-danger" style="padding: 5px 10px; font-size: 12px;" onclick="eliminarCliente('${c.id}')">Eliminar</button>
-                </td>
-            `;
-            tbody.appendChild(tr);
+            const opt = document.createElement('option');
+            opt.value = c.id;
+            opt.textContent = `${c.nombre} (${c.nit})`;
+            select.appendChild(opt);
+        });
+
+        if (clientes.some(c => c.id === valorSeleccionado)) {
+            select.value = valorSeleccionado;
+        } else {
+            document.getElementById('presupuesto-cliente-id').value = '';
+            document.getElementById('cliente-seleccionado-info').textContent = '';
+        }
+    }
+
+    window.seleccionarClientePresupuesto = function(clienteId) {
+        document.getElementById('presupuesto-cliente-id').value = clienteId;
+        const cliente = clientes.find(c => c.id === clienteId);
+        if (cliente) {
+            document.getElementById('cliente-seleccionado-info').textContent = `Cliente: ${cliente.nombre} | NIT: ${cliente.nit}`;
+        } else {
+            document.getElementById('cliente-seleccionado-info').textContent = '';
+        }
+    }
+
+    function actualizarDropdownsProductos() {
+        const dropdowns = document.querySelectorAll('.item-select');
+        dropdowns.forEach(select => {
+            const valorPrevio = select.value;
+            select.innerHTML = '<option value="">-- Selecciona un artículo --</option>';
+            inventario.forEach(art => {
+                const opt = document.createElement('option');
+                opt.value = art.id;
+                opt.textContent = `[${art.ean}] ${art.desc} - $${art.precio}`;
+                select.appendChild(opt);
+            });
+            select.value = valorPrevio;
         });
     }
 
-
-    /* 6. COMPORTAMIENTO DEL PRESUPUESTO */
-    window.filtrarClientesPresupuesto = function(query) {
-        const box = document.getElementById('suggestions-clientes');
-        if(!query) {
-            box.style.display = 'none';
-            return;
-        }
-        
-        const filtrados = clientes.filter(c => 
-            c.nombre.toLowerCase().includes(query.toLowerCase()) || 
-            c.nit.toLowerCase().includes(query.toLowerCase())
-        );
-
-        if(filtrados.length === 0) {
-            box.innerHTML = '<div class="suggestion-item" style="color:#718096; cursor:default;">No se encontraron resultados</div>';
-            box.style.display = 'block';
-            return;
-        }
-
-        box.innerHTML = '';
-        filtrados.forEach(c => {
-            const div = document.createElement('div');
-            div.className = 'suggestion-item';
-            div.textContent = `${c.nombre} (${c.nit})`;
-            div.onclick = () => {
-                document.getElementById('buscar-cliente-input').value = c.nombre;
-                document.getElementById('presupuesto-cliente-id').value = c.id;
-                document.getElementById('cliente-seleccionado-info').textContent = `Cliente: ${c.nombre} | NIT: ${c.nit}`;
-                box.style.display = 'none';
-            };
-            box.appendChild(div);
-        });
-        box.style.display = 'block';
-    }
-
-    window.buscarPorEan = function(input, index) {
-        const eanBusqueda = input.value.trim();
-        const artEncontrado = inventario.find(art => art.ean === eanBusqueda);
+    window.seleccionarProductoFila = function(select, index) {
+        const artId = select.value;
         const row = document.getElementById(`row-${index}`);
-        
-        if (artEncontrado) {
-            row.querySelector('.item-desc').value = artEncontrado.desc;
-            row.querySelector('.item-price').value = artEncontrado.precio;
-            calcularTotales();
+        const art = inventario.find(a => a.id === artId);
+        if (art) {
+            row.querySelector('.item-price').value = art.precio;
+        } else {
+            row.querySelector('.item-price').value = '';
         }
-    }
-
-    window.buscarPorDesc = function(input, index) {
-        const query = input.value.toLowerCase();
-        const row = document.getElementById(`row-${index}`);
-        const box = row.querySelector('.suggestions-box');
-        
-        if (!query) {
-            box.style.display = 'none';
-            return;
-        }
-
-        const filtrados = inventario.filter(art => 
-            art.desc.toLowerCase().includes(query) || 
-            art.ean.toLowerCase().includes(query)
-        );
-
-        if (filtrados.length === 0) {
-            box.innerHTML = '<div class="suggestion-item" style="color:#718096; cursor:default;">No registrado</div>';
-            box.style.display = 'block';
-            return;
-        }
-
-        box.innerHTML = '';
-        filtrados.forEach(art => {
-            const div = document.createElement('div');
-            div.className = 'suggestion-item';
-            div.textContent = `[${art.ean}] ${art.desc} - $${art.precio}`;
-            div.onclick = () => {
-                row.querySelector('.item-ean').value = art.ean;
-                input.value = art.desc;
-                row.querySelector('.item-price').value = art.precio;
-                box.style.display = 'none';
-                calcularTotales();
-            };
-            box.appendChild(div);
-        });
-        box.style.display = 'block';
+        calcularTotales();
     }
 
     window.agregarFilaItem = function() {
@@ -1148,13 +907,10 @@
         nuevaFila.id = `row-${countFilas}`;
         nuevaFila.innerHTML = `
             <div class="form-group" style="margin-bottom: 0;">
-                <label>Código EAN</label>
-                <input type="text" class="item-ean" placeholder="EAN13" oninput="buscarPorEan(this, ${countFilas})">
-            </div>
-            <div class="form-group" style="margin-bottom: 0;">
-                <label>Descripción del Artículo</label>
-                <input type="text" class="item-desc" placeholder="Escribe descripción o busca..." oninput="buscarPorDesc(this, ${countFilas})">
-                <div class="suggestions-box" style="display: none;"></div>
+                <label>Seleccionar Artículo del Inventario</label>
+                <select class="item-select" onchange="seleccionarProductoFila(this, ${countFilas})">
+                    <option value="">-- Selecciona un artículo --</option>
+                </select>
             </div>
             <div class="form-group" style="margin-bottom: 0;">
                 <label>Precio Unitario ($)</label>
@@ -1165,6 +921,16 @@
             </div>
         `;
         container.appendChild(nuevaFila);
+
+        // Rellenar dinámicamente el nuevo selector creado
+        const select = nuevaFila.querySelector('.item-select');
+        inventario.forEach(art => {
+            const opt = document.createElement('option');
+            opt.value = art.id;
+            opt.textContent = `[${art.ean}] ${art.desc} - $${art.precio}`;
+            select.appendChild(opt);
+        });
+
         countFilas++;
     }
 
@@ -1198,14 +964,183 @@
         return { subtotal, iva, total, formatoMoneda };
     }
 
-    // Cerrar sugerencias al hacer click fuera
-    document.addEventListener('click', function(e) {
-        if (!e.target.closest('.form-group')) {
-            document.querySelectorAll('.suggestions-box').forEach(el => el.style.display = 'none');
-        }
-    });
+    /* 4. SECCIÓN INVENTARIO */
+    window.guardarArticulo = async function(e) {
+        e.preventDefault();
+        if(!currentUser) return;
 
-    /* 7. VISTA DE IMPRESIÓN */
+        const nuevoArt = {
+            ean: document.getElementById('inv-ean').value.trim(),
+            desc: document.getElementById('inv-desc').value.trim(),
+            precio: parseFloat(document.getElementById('inv-precio').value) || 0
+        };
+
+        if(inventario.some(art => art.ean === nuevoArt.ean)) {
+            alert('Este código EAN ya se encuentra registrado.');
+            return;
+        }
+
+        try {
+            const nuevoArtRef = push(ref(db, `inventario/${currentUser.uid}`));
+            await set(nuevoArtRef, nuevoArt);
+            document.getElementById('inventario-form').reset();
+            alert('Artículo guardado.');
+        } catch (error) {
+            console.error(error);
+        }
+    }
+
+    window.eliminarArticulo = async function(id) {
+        if(!currentUser) return;
+        if(confirm('¿Seguro que deseas eliminar este artículo?')) {
+            try {
+                await remove(ref(db, `inventario/${currentUser.uid}/${id}`));
+            } catch (error) {
+                console.error(error);
+            }
+        }
+    }
+
+    function renderizarTablaInventario() {
+        const tbody = document.querySelector('#tabla-inventario tbody');
+        tbody.innerHTML = '';
+        const formatoMoneda = new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 });
+        inventario.forEach(art => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td><strong>${art.ean}</strong></td>
+                <td>${art.desc}</td>
+                <td>${formatoMoneda.format(art.precio)}</td>
+                <td>
+                    <button class="btn btn-danger" style="padding: 5px 10px; font-size: 12px;" onclick="eliminarArticulo('${art.id}')">Eliminar</button>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    /* 5. SECCIÓN CLIENTES */
+    window.guardarCliente = async function(e) {
+        e.preventDefault();
+        if(!currentUser) return;
+
+        const nuevoCliente = {
+            nit: document.getElementById('cli-nit').value.trim(),
+            nombre: document.getElementById('cli-nombre').value.trim(),
+            direccion: document.getElementById('cli-direccion').value.trim(),
+            cp: document.getElementById('cli-cp').value.trim(),
+            ciudad: document.getElementById('cli-ciudad').value.trim(),
+            telefono: document.getElementById('cli-telefono').value.trim(),
+            email: document.getElementById('cli-email').value.trim(),
+        };
+
+        try {
+            const nuevoClienteRef = push(ref(db, `clientes/${currentUser.uid}`));
+            await set(nuevoClienteRef, nuevoCliente);
+            document.getElementById('cliente-form').reset();
+            alert('Cliente registrado.');
+        } catch (error) {
+            console.error(error);
+        }
+    }
+
+    window.eliminarCliente = async function(id) {
+        if(!currentUser) return;
+        if(confirm('¿Seguro que deseas eliminar este cliente?')) {
+            try {
+                await remove(ref(db, `clientes/${currentUser.uid}/${id}`));
+            } catch (error) {
+                console.error(error);
+            }
+        }
+    }
+
+    function renderizarTablaClientes() {
+        const tbody = document.querySelector('#tabla-clientes tbody');
+        tbody.innerHTML = '';
+        clientes.forEach(c => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${c.nit}</td>
+                <td>${c.nombre}</td>
+                <td>${c.telefono}</td>
+                <td>${c.ciudad}</td>
+                <td>
+                    <button class="btn btn-danger" style="padding: 5px 10px; font-size: 12px;" onclick="eliminarCliente('${c.id}')">Eliminar</button>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    /* 6. CONFIGURACIÓN */
+    function cargarDatosEmpresaForm() {
+        document.getElementById('emp-nit').value = datosEmpresa.nit || '';
+        document.getElementById('emp-nombre').value = datosEmpresa.nombre || '';
+        document.getElementById('emp-direccion').value = datosEmpresa.direccion || '';
+        document.getElementById('emp-cp').value = datosEmpresa.cp || '';
+        document.getElementById('emp-ciudad').value = datosEmpresa.ciudad || '';
+        document.getElementById('emp-telefono').value = datosEmpresa.telefono || '';
+        document.getElementById('emp-email').value = datosEmpresa.email || '';
+        document.getElementById('emp-garantias').value = datosEmpresa.garantias || '';
+        
+        const preview = document.getElementById('logo-preview');
+        if (datosEmpresa.logo) {
+            preview.src = datosEmpresa.logo;
+            preview.style.display = 'block';
+            document.getElementById('no-logo-text').style.display = 'none';
+        } else {
+            preview.style.display = 'none';
+            document.getElementById('no-logo-text').style.display = 'block';
+        }
+    }
+
+    window.convertirLogo = function(input) {
+        const file = input.files[0];
+        if (file) {
+            if (file.size > 800 * 1024) { 
+                alert("La imagen es muy pesada. Sube una menor a 800KB.");
+                input.value = "";
+                return;
+            }
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                datosEmpresa.logo = e.target.result;
+                const preview = document.getElementById('logo-preview');
+                preview.src = e.target.result;
+                preview.style.display = 'block';
+                document.getElementById('no-logo-text').style.display = 'none';
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+
+    window.guardarEmpresa = async function(e) {
+        e.preventDefault();
+        if(!currentUser) return;
+        
+        const nuevaConfig = {
+            nombre: document.getElementById('emp-nombre').value,
+            nit: document.getElementById('emp-nit').value,
+            direccion: document.getElementById('emp-direccion').value,
+            cp: document.getElementById('emp-cp').value,
+            ciudad: document.getElementById('emp-ciudad').value,
+            telefono: document.getElementById('emp-telefono').value,
+            email: document.getElementById('emp-email').value,
+            garantias: document.getElementById('emp-garantias').value,
+            logo: datosEmpresa.logo || "" 
+        };
+
+        try {
+            await set(ref(db, `configuracion/${currentUser.uid}`), nuevaConfig);
+            alert('Configuración guardada.');
+            toggleModal('config-modal', false);
+        } catch (error) {
+            console.error(error);
+        }
+    }
+
+    /* 7. GENERACIÓN DEL PRESUPUESTO */
     window.generarPresupuestoPDF = function() {
         const clienteId = document.getElementById('presupuesto-cliente-id').value;
         if (!clienteId) {
@@ -1220,12 +1155,13 @@
         let articulosValidos = [];
 
         filas.forEach(row => {
-            const ean = row.querySelector('.item-ean').value.trim();
-            const desc = row.querySelector('.item-desc').value.trim();
+            const select = row.querySelector('.item-select');
+            const artId = select.value;
             const precio = parseFloat(row.querySelector('.item-price').value) || 0;
+            const art = inventario.find(a => a.id === artId);
 
-            if(desc !== "" && precio > 0) {
-                articulosValidos.push({ ean, desc, precio });
+            if(art && precio > 0) {
+                articulosValidos.push({ ean: art.ean, desc: art.desc, precio: precio });
             }
         });
 
@@ -1234,7 +1170,7 @@
             return;
         }
 
-        // Datos de Empresa
+        // Configuración de Empresa en PDF
         document.getElementById('p-emp-nombre').textContent = datosEmpresa.nombre || '[Sin configurar]';
         document.getElementById('p-emp-nit').textContent = datosEmpresa.nit || '-';
         document.getElementById('p-emp-direccion').textContent = datosEmpresa.direccion || '-';
@@ -1252,7 +1188,7 @@
             pLogo.style.display = 'none';
         }
 
-        // Datos del Cliente
+        // Datos del Cliente en PDF
         document.getElementById('p-cli-nombre').textContent = cliente.nombre;
         document.getElementById('p-cli-nit').textContent = cliente.nit;
         document.getElementById('p-cli-direccion').textContent = cliente.direccion;
@@ -1261,7 +1197,7 @@
         document.getElementById('p-cli-telefono').textContent = cliente.telefono;
         document.getElementById('p-cli-email').textContent = cliente.email;
 
-        // Tabla
+        // Tabla PDF
         const pTablaBody = document.querySelector('#p-tabla-articulos tbody');
         pTablaBody.innerHTML = '';
         
@@ -1286,7 +1222,7 @@
         document.getElementById('p-iva').textContent = formatoMoneda.format(iva);
         document.getElementById('p-total').textContent = formatoMoneda.format(total);
 
-        // Ocultar app y mostrar impresión
+        // Ocultar app y mostrar vista previa de impresión
         document.querySelector('.container').style.display = 'none';
         document.getElementById('print-preview').style.display = 'block';
         window.scrollTo(0, 0);
@@ -1302,7 +1238,7 @@
 </script>
 
 <script>
-    // Funciones globales visuales
+    // Navegación Visual Estructural
     function openTab(evt, tabName) {
         document.querySelectorAll(".tab-content").forEach(el => el.classList.remove("active"));
         document.querySelectorAll(".tab-btn").forEach(el => el.classList.remove("active"));
